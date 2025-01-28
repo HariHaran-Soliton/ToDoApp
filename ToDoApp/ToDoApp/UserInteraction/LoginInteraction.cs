@@ -28,9 +28,9 @@ namespace ToDoApp.UserInteraction
             int userId;
             bool IsUserId = int.TryParse(Console.ReadLine(), out userId);
             IsUserId = checkUserIdPresent(userId);
-            while (IsUserId)
+            while (userId==0 || IsUserId)
             {
-                Console.WriteLine("Enter Unique Id");
+                Console.WriteLine("Enter Valid Id");
                 IsUserId = int.TryParse(Console.ReadLine(), out userId);
                 IsUserId = checkUserIdPresent(userId);
             }
@@ -131,7 +131,7 @@ namespace ToDoApp.UserInteraction
             int userId=GetExistingUserId();
             Console.WriteLine("Enter The Password");
             string passWord =GetExistingUserPassWord();
-            Console.WriteLine("Login successful");
+            Console.WriteLine("\n****Login successful****\n");
             return userId;
         }
     }

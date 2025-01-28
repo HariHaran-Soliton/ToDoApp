@@ -28,6 +28,12 @@ namespace ToDoApp.Manager
                         ToDoInteraction.PrintAllToDo(userID);
                         break;
                     case 3:
+                        ToDoInteraction.DeleteToDo(userID);
+                        break;
+                    case 4:
+                        ToDoInteraction.EditToDo(userID);
+                        break;
+                    case 5:
                         IsNeedToExit = false;
                         break;
                     default:
@@ -40,7 +46,7 @@ namespace ToDoApp.Manager
         {
             int userChoice;
             bool IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);
-            while ((userChoice <= 0 || userChoice >= 4) || !IsValidChoice)
+            while ((userChoice <= 0 || userChoice >= 6) || !IsValidChoice)
             {
                 Console.WriteLine("Enter Valid Option");
                 IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);
