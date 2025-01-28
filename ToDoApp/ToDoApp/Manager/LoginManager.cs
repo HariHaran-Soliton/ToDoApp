@@ -1,14 +1,18 @@
-﻿using ToDoApp.UserInteraction;
+﻿using ToDoApp.Repository;
+using ToDoApp.UserInteraction;
 
 namespace ToDoApp.Manager
 {
     public class LoginManager
     {
         public LoginInteraction _loginInteraction;
-
-        public LoginManager(LoginInteraction loginInteraction)
+        public ToDoRepository ToDoRepository;
+        public ToDoManager ToDoManager;
+        public LoginManager(LoginInteraction loginInteraction, ToDoRepository toDoRepository, ToDoManager toDoManager)
         {
             _loginInteraction = loginInteraction;
+            ToDoRepository = toDoRepository;
+            ToDoManager = toDoManager;
         }
 
         public void LoginMenu()
@@ -24,7 +28,8 @@ namespace ToDoApp.Manager
                         _loginInteraction.AddNewUser();
                         break;
                     case 2:
-                        _loginInteraction.ExistingUser();
+                        int userId=_loginInteraction.ExistingUser();
+                        ToDoManager.ToDoMenu(userId);
                         break;
                     case 3:
                         IsNeedToExit = false;
@@ -35,6 +40,7 @@ namespace ToDoApp.Manager
 
                 }
             }
+            Console.WriteLine("Exiting the App....");
         }
 
         public int GetUserChoice()

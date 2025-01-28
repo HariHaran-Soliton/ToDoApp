@@ -19,6 +19,7 @@
     }
     public enum TaskRecurrence
     {
+        None = 0,
         Daily,
         Weekly,
         Monthly,

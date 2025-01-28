@@ -10,7 +10,10 @@ namespace ToDoApp
         {
             UserRepository userRepository = new UserRepository();
             LoginInteraction loginInteraction = new LoginInteraction(userRepository);
-            LoginManager loginManager = new LoginManager(loginInteraction);
+            ToDoRepository toDoRepository = new ToDoRepository();
+            ToDoInteraction toDoInteraction=new ToDoInteraction(toDoRepository);
+            ToDoManager toDoManager=new ToDoManager(toDoInteraction);
+            LoginManager loginManager = new LoginManager(loginInteraction,toDoRepository,toDoManager);
             loginManager.LoginMenu();
             Console.ReadKey();
         }

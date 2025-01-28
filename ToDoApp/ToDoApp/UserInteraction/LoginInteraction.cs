@@ -125,13 +125,14 @@ namespace ToDoApp.UserInteraction
             }
             return passWord;
         }
-        public void ExistingUser()
+        public int ExistingUser()
         {
             Console.WriteLine("Enter UserId");
             int userId=GetExistingUserId();
             Console.WriteLine("Enter The Password");
             string passWord =GetExistingUserPassWord();
             Console.WriteLine("Login successful");
+            return userId;
         }
     }
 }
