@@ -1,0 +1,27 @@
+﻿namespace ToDoApp.Models
+{
+    public class ToDo
+    {
+        public int UserId { get; set; }
+        public string? ToDoHeading { get; set; }
+        public string? ToDoDescription { get; set; }
+        public DateTime TargetDate { get; set; }
+        public TaskRecurrence ToDoRecurrence { get; set; }
+
+        public ToDo(int userId, string? toDoHeading, string? toDoDescription, DateTime targetDate, TaskRecurrence toDoRecurrence)
+        {
+            UserId = userId;
+            ToDoHeading = toDoHeading;
+            ToDoDescription = toDoDescription;
+            TargetDate = targetDate;
+            ToDoRecurrence = toDoRecurrence;
+        }
+    }
+    public enum TaskRecurrence
+    {
+        Daily,
+        Weekly,
+        Monthly,
+        Yearly
+    }
+}
