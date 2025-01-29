@@ -1,26 +1,27 @@
 ﻿using ToDoApp.Models;
-using ToDoApp.Repository;
+using ToDoApp.Service;
 
 namespace ToDoApp.UserInteraction
 {
     public class ToDoInteraction
     {
-        public ToDoRepository ToDoRepository { get; set; }
+        private ToDoService _toDoService;
 
-        public ToDoInteraction(ToDoRepository toDoRepository)
+        public ToDoInteraction(ToDoService toDoService)
         {
-            ToDoRepository = toDoRepository;
+            _toDoService = toDoService;
         }
 
         public void PrintToDoMenu()
         {
             Console.WriteLine("\n    TODO APP    ");
             Console.WriteLine("================");
-            Console.WriteLine("1. Add");
+            Console.WriteLine("1.Add");
             Console.WriteLine("2.View");
             Console.WriteLine("3.Delete");
             Console.WriteLine("4.Edit");
-            Console.WriteLine("5.Exit");
+            Console.WriteLine("5.Calender");
+            Console.WriteLine("6.Exit");
             Console.WriteLine("Enter Option:");
         }
 
@@ -35,7 +36,7 @@ namespace ToDoApp.UserInteraction
             }
             return date;
         }
-        public string ValidateStringinput()
+        public string GetValidString()
         {
             string ValidInput = Console.ReadLine();
             while (ValidInput == null || ValidInput == "")
@@ -47,7 +48,7 @@ namespace ToDoApp.UserInteraction
             return ValidInput;
         }
 
-        public TaskRecurrence AddRecurrenceToInput()
+        public TaskRecurrence AddRecurrenceToNewToDo()
         {
             string enterToRecurrence = Console.ReadLine();
             while ((enterToRecurrence == "Y" && enterToRecurrence == "N") || enterToRecurrence == null || enterToRecurrence == "")
@@ -66,22 +67,24 @@ namespace ToDoApp.UserInteraction
                 case "n":
                     break;
             }
-
             return taskRecurrence;
         }
-        public void AddNewToDo(int userId)
+        public void AddNewToDo(string userName)
         {
+            Console.WriteLine("In Add Section\n");
             Console.WriteLine("Enter New ToDo");
             Console.WriteLine("Enter Title:");
-            string title = ValidateStringinput();
+            string title = GetValidString();
             Console.WriteLine("Enter description:");
-            string description = ValidateStringinput();
+            string description = GetValidString();
             Console.WriteLine("Enter ToDo Date");
             DateTime date = GetValidToDoDate();
             Console.WriteLine("Would You Like to Add recurrence Of ToDo");
             Console.WriteLine("Y/N");
-            TaskRecurrence taskRecurrence = AddRecurrenceToInput();
-            ToDoRepository.AddToListOfToDo(new ToDo(userId, title, description, date, taskRecurrence));
+            TaskRecurrence taskRecurrence = AddRecurrenceToNewToDo();
+            _toDoService.AddToListOfToDo(userName, new ToDo(title, description, date, taskRecurrence));
+            Console.WriteLine("New To Do Added Successfully!");
+            _toDoService.saveToJson();
         }
 
         public TaskRecurrence GetOneRecurrence()
@@ -125,17 +128,16 @@ namespace ToDoApp.UserInteraction
             return userChoice;
         }
 
-        public void PrintAllToDo(int userID)
+        public void PrintAllToDo(string userName)
         {
-            IEnumerable<ToDo> toDos = ToDoRepository.GetAll();
+            Console.WriteLine("In View Section");
+            IEnumerable<ToDo> toDos = _toDoService.GetAll(userName);
             if (toDos != null)
             {
                 foreach (var toDo in toDos)
                 {
-                    if (toDo.UserId == userID)
-                    {
-                        Console.WriteLine($"{toDo.ToDoHeading}| {toDo.ToDoDescription} | {toDo.TargetDate.ToString("dd/MM/yyyy")} | {toDo.ToDoRecurrence} |");
-                    }
+
+                    Console.WriteLine($"Tile: {toDo.ToDoHeading} | Description: {toDo.ToDoDescription} | Date: {toDo.TargetDate.ToString("dd/MM/yyyy")} | Recurrence: {toDo.ToDoRecurrence}");
                 }
             }
             else
@@ -144,70 +146,63 @@ namespace ToDoApp.UserInteraction
             }
         }
 
-        public void DeleteToDo(int userID)
+        public void DeleteToDo(string userName)
         {
+            Console.WriteLine("In Delete Section\n");
             Console.WriteLine("Enter Date");
             DateTime date = GetValidToDoDate();
-            for (int i = 0; i < ToDoRepository.ToDoOfUser.Count; i++)
+            foreach (ToDo toDo in _toDoService.ToDoOfUser[userName])
             {
-                var toDo = ToDoRepository.ToDoOfUser[i];
-                if (toDo.UserId == userID)
+                if (toDo.TargetDate == date)
                 {
-                    if (toDo.TargetDate == date)
+                    Console.WriteLine($"{toDo.ToDoHeading}| {toDo.ToDoDescription} | {toDo.TargetDate.ToString("dd/MM/yyyy")} | {toDo.ToDoRecurrence} |");
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("1.Delete ToDo");
+                    Console.WriteLine("2.Move to Next");
+                    int option = GetOptionOneOrTwo();
+                    if (option == 1)
                     {
-                        Console.WriteLine($"{toDo.ToDoHeading}| {toDo.ToDoDescription} | {toDo.TargetDate.ToString("dd/MM/yyyy")} | {toDo.ToDoRecurrence} |");
-                        Console.WriteLine("----------------");
-                        Console.WriteLine("1.Delete ToDo");
-                        Console.WriteLine("2.Move to Next");
-                        int option = int.Parse(Console.ReadLine());
-                        if ( option== 1)
-                        {
-                            ToDoRepository.ToDoOfUser.Remove(toDo);
-                            Console.WriteLine("Deleted successfully\n");
-                            i--;
-                            return;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Moving to next");
-                        }
+                        _toDoService.DeleteFromToDO(userName, toDo);
+                        Console.WriteLine("Deleted successfully\n");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Moving to next");
                     }
                 }
             }
-            Console.WriteLine("No ToDo found deleted!\n");
+            Console.WriteLine("No ToDo found to delete!\n");
+            _toDoService.saveToJson();
         }
-
-        public void EditToDo(int userID)
+        public void EditToDo(string userName)
         {
+            Console.WriteLine("In Edit Section\n");
             Console.WriteLine("Enter Date");
             DateTime date = GetValidToDoDate();
-            for (int i = 0; i < ToDoRepository.ToDoOfUser.Count; i++)
+            foreach (ToDo toDo in _toDoService.ToDoOfUser[userName])
             {
-                var toDo = ToDoRepository.ToDoOfUser[i];
-                if (toDo.UserId == userID)
+                if (toDo.TargetDate == date)
                 {
-                    if (toDo.TargetDate == date)
+                    Console.WriteLine($"{toDo.ToDoHeading}| {toDo.ToDoDescription} | {toDo.TargetDate.ToString("dd/MM/yyyy")} | {toDo.ToDoRecurrence} |");
+                    Console.WriteLine("----------------");
+                    Console.WriteLine("1.Edit ToDo");
+                    Console.WriteLine("2.Move to Next");
+                    int option = GetOptionOneOrTwo();
+                    if (option == 1)
                     {
-                        Console.WriteLine($"{toDo.ToDoHeading}| {toDo.ToDoDescription} | {toDo.TargetDate.ToString("dd/MM/yyyy")} | {toDo.ToDoRecurrence} |");
-                        Console.WriteLine("----------------");
-                        Console.WriteLine("1.Edit ToDo");
-                        Console.WriteLine("2.Move To next");
-                        int option = int.Parse(Console.ReadLine());
-                        if ( option== 1)
-                        {
-                            EditAToDo(toDo);
-                            Console.WriteLine("Edited successfully\n");
-                            i--;
-                            return;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Moving to next ToDo");
-                        }
+                        EditAToDo(toDo);
+                        Console.WriteLine("Edited successfully\n");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Moving to next");
                     }
                 }
             }
-            Console.WriteLine("No ToDo found edited!..\n");
+            Console.WriteLine("No ToDo found to Edit!\n");
+            _toDoService.saveToJson();
         }
 
         public void EditAToDo(ToDo toDo)
@@ -218,29 +213,29 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("3.Target Date");
             Console.WriteLine("4.Task Recurrence");
             Console.WriteLine("Enter the option");
-            int choice =GetUserChoice();
-            switch(choice)
+            int choice = GetUserChoice();
+            switch (choice)
             {
                 case 1:
                     Console.WriteLine("Enter new Title");
-                    string newTitle = ValidateStringinput();
-                    toDo.ToDoHeading= newTitle;
+                    string newTitle = GetValidString();
+                    toDo.ToDoHeading = newTitle;
                     break;
                 case 2:
-                    Console.WriteLine("Enter New descripition");
-                    string newDescription=ValidateStringinput();
-                    toDo.ToDoDescription= newDescription;
+                    Console.WriteLine("Enter New description");
+                    string newDescription = GetValidString();
+                    toDo.ToDoDescription = newDescription;
                     break;
                 case 3:
                     Console.WriteLine("Enter New Date");
-                    DateTime newDate=GetValidToDoDate();
-                    toDo.TargetDate= newDate;
+                    DateTime newDate = GetValidToDoDate();
+                    toDo.TargetDate = newDate;
                     break;
                 case 4:
                     Console.WriteLine("Enter new Recurrence");
                     Console.WriteLine("Y/N");
-                    TaskRecurrence newTaskRecurrence = AddRecurrenceToInput();
-                    toDo.ToDoRecurrence= newTaskRecurrence;
+                    TaskRecurrence newTaskRecurrence = AddRecurrenceToNewToDo();
+                    toDo.ToDoRecurrence = newTaskRecurrence;
                     break;
                 default:
                     Console.WriteLine("Not Valid Option");
@@ -248,6 +243,113 @@ namespace ToDoApp.UserInteraction
             }
 
         }
-        
+        public int GetOptionOneOrTwo()
+        {
+            bool IsValidOption = int.TryParse(Console.ReadLine(), out int option);
+            while (!IsValidOption)
+            {
+                Console.WriteLine("Enter 1 or 2");
+                IsValidOption = int.TryParse(Console.ReadLine(), out option);
+            }
+            return option;
+        }
+
+        public void PrintDashBoard(string userName)
+        {
+            var toDo = _toDoService.ToDoOfUser[userName];
+            var dashboardList = toDo.OrderBy(x => x.TargetDate).Take(2);
+
+            if (dashboardList.Any())
+            {
+                Console.WriteLine("\n================");
+                Console.WriteLine("    DASHBOARD   ");
+                Console.WriteLine("  UpComing Tasks");
+                foreach (var item in dashboardList)
+                {
+                    Console.WriteLine($"Tile: {item.ToDoHeading} | Description: {item.ToDoDescription} | Date: {item.TargetDate.ToString("dd/MM/yyyy")} | Recurrence: {item.ToDoRecurrence}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\n================");
+                Console.WriteLine("    DASHBOARD   ");
+                Console.WriteLine("No upcoming tasks.");
+            }
+        }
+
+        public void DisplayCalendar(string userName)
+        {
+            Console.WriteLine("1. Daily");
+            Console.WriteLine("2. Weekly");
+            Console.WriteLine("3. Monthly");
+            Console.WriteLine("4. Yearly");
+            Console.WriteLine("Enter the duration:");
+            string duration = Console.ReadLine();
+            var toDoList = _toDoService.ToDoOfUser[userName];
+            IEnumerable<ToDo> filteredToDos = Enumerable.Empty<ToDo>();
+
+            switch (duration)
+            {
+                case "1":
+                    filteredToDos = GetTasksByRecurrence(toDoList, TaskRecurrence.Daily);
+                    break;
+                case "2":
+                    filteredToDos = GetTasksByRecurrence(toDoList, TaskRecurrence.Weekly);
+                    break;
+                case "3":
+                    filteredToDos = GetTasksByRecurrence(toDoList, TaskRecurrence.Monthly);
+                    break;
+                case "4":
+                    filteredToDos = GetTasksByRecurrence(toDoList, TaskRecurrence.Yearly);
+                    break;
+                default:
+                    Console.WriteLine("Invalid duration. Please choose '1', '2', '3', or '4'.");
+                    return;
+            }
+
+            if (filteredToDos.Any())
+            {
+                Console.WriteLine("\n================");
+                Console.WriteLine("    CALENDAR    ");
+                foreach (var toDo in filteredToDos.OrderBy(toDo => toDo.TargetDate))
+                {
+                    Console.WriteLine($"Title: {toDo.ToDoHeading} | Description: {toDo.ToDoDescription}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No tasks found for the selected duration.");
+            }
+        }
+
+        private IEnumerable<ToDo> GetTasksByRecurrence(IEnumerable<ToDo> toDoList, TaskRecurrence recurrence)
+        {
+            DateTime today = DateTime.Today;
+            var tasks = new List<ToDo>();
+
+            foreach (var toDo in toDoList)
+            {
+                if (toDo.ToDoRecurrence == recurrence)
+                {
+                    switch (recurrence)
+                    {
+                        case TaskRecurrence.Daily:
+                            tasks.Add(new ToDo(toDo.ToDoHeading, toDo.ToDoDescription, today, toDo.ToDoRecurrence));
+                            break;
+                        case TaskRecurrence.Weekly:
+                            tasks.Add(new ToDo(toDo.ToDoHeading, toDo.ToDoDescription, today.AddDays(7), toDo.ToDoRecurrence));
+                            break;
+                        case TaskRecurrence.Monthly:
+                            tasks.Add(new ToDo(toDo.ToDoHeading, toDo.ToDoDescription, today.AddMonths(1), toDo.ToDoRecurrence));
+                            break;
+                        case TaskRecurrence.Yearly:
+                            tasks.Add(new ToDo(toDo.ToDoHeading, toDo.ToDoDescription, today.AddYears(1), toDo.ToDoRecurrence));
+                            break;
+                    }
+                }
+            }
+
+            return tasks;
+        }
     }
 }

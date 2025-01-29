@@ -11,42 +11,48 @@ namespace ToDoApp.Manager
             ToDoInteraction = toDoInteraction;
         }
 
-        public void ToDoMenu(int userID)
+        public bool ToDoMenu(string userName)
         {
             bool IsNeedToExit = true;
             while (IsNeedToExit)
             {
+                ToDoInteraction.PrintDashBoard(userName);
                 ToDoInteraction.PrintToDoMenu();
                 int choice = GetUserChoice();
 
                 switch (choice)
                 {
                     case 1:
-                        ToDoInteraction.AddNewToDo(userID);
+                        ToDoInteraction.AddNewToDo(userName);
                         break;
                     case 2:
-                        ToDoInteraction.PrintAllToDo(userID);
+                        ToDoInteraction.PrintAllToDo(userName);
                         break;
                     case 3:
-                        ToDoInteraction.DeleteToDo(userID);
+                        ToDoInteraction.DeleteToDo(userName);
                         break;
                     case 4:
-                        ToDoInteraction.EditToDo(userID);
+                        ToDoInteraction.EditToDo(userName);
                         break;
                     case 5:
+                        ToDoInteraction.DisplayCalendar(userName);
+                        break;
+                    case 6:
                         IsNeedToExit = false;
+                        Console.Clear();
                         break;
                     default:
                         Console.WriteLine("Enter valid choice");
                         break;
                 }
             }
+            return IsNeedToExit;
         }
         public int GetUserChoice()
         {
             int userChoice;
             bool IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);
-            while ((userChoice <= 0 || userChoice >= 6) || !IsValidChoice)
+            while ((userChoice <= 0 || userChoice >= 7) || !IsValidChoice)
             {
                 Console.WriteLine("Enter Valid Option");
                 IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);

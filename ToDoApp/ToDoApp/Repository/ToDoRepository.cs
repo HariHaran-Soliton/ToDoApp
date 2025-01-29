@@ -1,28 +1,30 @@
-﻿using ToDoApp.Models;
+﻿using Newtonsoft.Json;
+using ToDoApp.Models;
 
 namespace ToDoApp.Repository
 {
     public class ToDoRepository
     {
-        public List<ToDo> ToDoOfUser { get; set; }
-
-        public ToDoRepository()
+        string filePath = "ToDoS.json";
+        public Dictionary<string, List<ToDo>> ReadAlldata()
         {
-            this.ToDoOfUser = new List<ToDo>();
-        }
-
-        public void AddToListOfToDo(ToDo toDo)
-        {
-            ToDoOfUser.Add(toDo);
-        }
-
-        public IEnumerable<ToDo> GetAll()
-        {
-            if(ToDoOfUser.Count == 0)
+            if (!File.Exists(filePath))
             {
-                return null;
+                return new Dictionary<string, List<ToDo>>();
             }
-            return ToDoOfUser;
+            var vSettings = new JsonSerializerSettings();
+            vSettings.TypeNameHandling = TypeNameHandling.Objects;
+            var vJsonStr = File.ReadAllText(filePath);
+            Dictionary<string, List<ToDo>> toDoDictionary = JsonConvert.DeserializeObject<Dictionary<string, List<ToDo>>>(vJsonStr);
+           return toDoDictionary;
+        }
+
+        public void WriteData(Dictionary<string, List<ToDo>> ToDoList)
+        {
+            var vSettings = new JsonSerializerSettings();
+            vSettings.TypeNameHandling = TypeNameHandling.Objects;
+            var vJsonStr = JsonConvert.SerializeObject(ToDoList, Formatting.Indented, vSettings);
+            File.WriteAllText(filePath, vJsonStr);
         }
     }
 }

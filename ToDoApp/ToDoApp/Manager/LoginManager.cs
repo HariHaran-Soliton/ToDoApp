@@ -1,53 +1,49 @@
-﻿using ToDoApp.Repository;
-using ToDoApp.UserInteraction;
+﻿using ToDoApp.UserInteraction;
 
 namespace ToDoApp.Manager
 {
     public class LoginManager
     {
         public LoginInteraction _loginInteraction;
-        public ToDoRepository ToDoRepository;
-        public ToDoManager ToDoManager;
-        public LoginManager(LoginInteraction loginInteraction, ToDoRepository toDoRepository, ToDoManager toDoManager)
+        public LoginManager(LoginInteraction loginInteraction)
         {
             _loginInteraction = loginInteraction;
-            ToDoRepository = toDoRepository;
-            ToDoManager = toDoManager;
         }
 
-        public void LoginMenu()
+        public string? LoginMenu()
         {
-            bool IsNeedToExit=true;
+            string? userName = null;
+            bool IsNeedToExit = true;
             while (IsNeedToExit)
             {
                 _loginInteraction.PrintLoginMenu();
-                int choice=GetUserChoice();
+                int choice = GetUserChoice();
                 switch (choice)
                 {
                     case 1:
-                        _loginInteraction.AddNewUser();
-                        break;
+                        userName = _loginInteraction.AddNewUser();
+                        return userName;
                     case 2:
-                        int userId=_loginInteraction.ExistingUser();
-                        ToDoManager.ToDoMenu(userId);
-                        break;
+                        userName = _loginInteraction.ExistingUser();
+                        return userName;
                     case 3:
                         IsNeedToExit = false;
+                        _loginInteraction.SaveDataToJson();
                         break;
                     default:
                         Console.WriteLine("Enter Valid Option");
                         break;
-
                 }
             }
-            Console.WriteLine("Exiting the App....");
+
+            return userName;
         }
 
         public int GetUserChoice()
         {
             int userChoice;
-            bool IsValidChoice=int.TryParse(Console.ReadLine(), out userChoice);
-            while((userChoice<=0 || userChoice >=4) || !IsValidChoice)
+            bool IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);
+            while ((userChoice <= 0 || userChoice >= 4) || !IsValidChoice)
             {
                 Console.WriteLine("Enter Valid Option");
                 IsValidChoice = int.TryParse(Console.ReadLine(), out userChoice);

@@ -1,20 +1,22 @@
 ﻿using ToDoApp.Models;
-using ToDoApp.Repository;
+using ToDoApp.Service;
 
 namespace ToDoApp.UserInteraction
 {
     public class LoginInteraction
     {
-        private readonly UserRepository _userRepository;
+        private LoginService _loginService;
+        private ToDoService _toDoService;
 
-        public LoginInteraction(UserRepository userRepository)
+        public LoginInteraction(LoginService loginService, ToDoService toDoService)
         {
-            _userRepository = userRepository;
+            _loginService = loginService;
+            _toDoService = toDoService;
         }
 
         public void PrintLoginMenu()
         {
-            Console.WriteLine("================");
+            Console.WriteLine("\n================");
             Console.WriteLine("    ToDo App");
             Console.WriteLine("================");
             Console.WriteLine("1.New User");
@@ -27,12 +29,12 @@ namespace ToDoApp.UserInteraction
         {
             int userId;
             bool IsUserId = int.TryParse(Console.ReadLine(), out userId);
-            IsUserId = checkUserIdPresent(userId);
+            IsUserId = _loginService.checkUserIdPresent(userId);
             while (userId==0 || IsUserId)
             {
                 Console.WriteLine("Enter Valid Id");
                 IsUserId = int.TryParse(Console.ReadLine(), out userId);
-                IsUserId = checkUserIdPresent(userId);
+                IsUserId = _loginService.checkUserIdPresent(userId);
             }
             return userId;
         }
@@ -40,16 +42,16 @@ namespace ToDoApp.UserInteraction
         public string GetUserPassWord()
         {
             string? passWord = Console.ReadLine();
-            bool isPass = PassWordValidator(passWord);
+            bool isPass = _loginService.PassWordValidator(passWord);
             while (!isPass)
             {
                 Console.WriteLine("Enter Valid PassWord");
                 passWord = Console.ReadLine();
-                isPass = PassWordValidator(passWord);
+                isPass = _loginService.PassWordValidator(passWord);
             }
             return passWord;
         }
-        public void AddNewUser()
+        public string AddNewUser()
         {
             Console.WriteLine("Enter Your Name");
             string? name=Console.ReadLine();
@@ -58,81 +60,51 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("Enter The Password (six characters)");
             string passWord=GetUserPassWord();
             string userName=name+userId;
-            _userRepository.AddUserToList(new User(userId, name, userName, passWord));
+            _loginService.AddUserToList(new User(userId, name, userName, passWord));
             Console.WriteLine("User Added Successfully!");
+            _toDoService.InitializeUser(userName);
+            _loginService.saveToJson();
+            return userName;
         }
-
-        public bool PassWordValidator(string PassWord)
-        {
-           if(PassWord.Length >=6)
-            {
-                return true;
-            }
-           else
-            {
-                return false;
-            }
-        }
-
-        public bool checkUserIdPresent(int id)
-        {
-            IEnumerable<User> usersInList = _userRepository.GetListOfUsers();
-            foreach (var user in usersInList)
-            {
-                if(user.UserId == id)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public bool checkPassWordPresent(string passWord)
-        {
-            IEnumerable<User> usersInList = _userRepository.GetListOfUsers();
-            foreach (var user in usersInList)
-            {
-                if (user.Password == passWord)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public int GetExistingUserId()
         {
             int userId;
             bool IsUserId = int.TryParse(Console.ReadLine(), out userId);
-            IsUserId = checkUserIdPresent(userId);
+            IsUserId = _loginService.checkUserIdPresent(userId);
             while (!IsUserId)
             {
                 Console.WriteLine("User ID not present! Enter again");
                 IsUserId = int.TryParse(Console.ReadLine(), out userId);
-                IsUserId = checkUserIdPresent(userId);
+                IsUserId = _loginService.checkUserIdPresent(userId);
             }
             return userId;
         }
-
         public string GetExistingUserPassWord()
         {
             string? passWord = Console.ReadLine();
-            bool isPass = checkPassWordPresent(passWord);
+            bool isPass = _loginService.checkPassWordPresent(passWord);
             while (!isPass)
             {
                 Console.WriteLine("Enter Valid PassWord");
                 passWord = Console.ReadLine();
-                isPass = PassWordValidator(passWord);
+                isPass = _loginService.PassWordValidator(passWord);
             }
             return passWord;
         }
-        public int ExistingUser()
+        public string? ExistingUser()
         {
             Console.WriteLine("Enter UserId");
             int userId=GetExistingUserId();
             Console.WriteLine("Enter The Password");
             string passWord =GetExistingUserPassWord();
             Console.WriteLine("\n****Login successful****\n");
-            return userId;
+            string? userName=_loginService.GetUserPassWord(userId);
+            return userName;
+        }
+
+        public void SaveDataToJson()
+        {
+            _loginService.saveToJson();
         }
     }
 }
