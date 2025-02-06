@@ -20,7 +20,7 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("2.View");
             Console.WriteLine("3.Delete");
             Console.WriteLine("4.Edit");
-            Console.WriteLine("5.Calender");
+            Console.WriteLine("5.Calendar");
             Console.WriteLine("6.Exit");
             Console.WriteLine("Enter Option:");
         }
@@ -31,14 +31,14 @@ namespace ToDoApp.UserInteraction
             bool IsDate = DateTime.TryParse(Console.ReadLine(), out date);
             while (date < DateTime.Now || !IsDate)
             {
-                Console.WriteLine("Enter Valid Date!");
+                Console.WriteLine("Enter Valid Date (dd/MM/yyy)!");
                 IsDate = DateTime.TryParse(Console.ReadLine(), out date);
             }
             return date;
         }
         public string GetValidString()
         {
-            string ValidInput = Console.ReadLine();
+            string? ValidInput = Console.ReadLine();
             while (ValidInput == null || ValidInput == "")
             {
                 Console.WriteLine("Enter Valid input");
@@ -50,7 +50,7 @@ namespace ToDoApp.UserInteraction
 
         public TaskRecurrence AddRecurrenceToNewToDo()
         {
-            string enterToRecurrence = Console.ReadLine();
+            string? enterToRecurrence = Console.ReadLine();
             while ((enterToRecurrence == "Y" && enterToRecurrence == "N") || enterToRecurrence == null || enterToRecurrence == "")
             {
                 Console.WriteLine("Enter Y/N");
@@ -77,7 +77,7 @@ namespace ToDoApp.UserInteraction
             string title = GetValidString();
             Console.WriteLine("Enter description:");
             string description = GetValidString();
-            Console.WriteLine("Enter ToDo Date");
+            Console.WriteLine("Enter ToDo Date (dd/MM/yyyy)");
             DateTime date = GetValidToDoDate();
             Console.WriteLine("Would You Like to Add recurrence Of ToDo");
             Console.WriteLine("Y/N");
@@ -91,7 +91,7 @@ namespace ToDoApp.UserInteraction
         {
             Console.WriteLine("1.Daily");
             Console.WriteLine("2.Weekly");
-            Console.WriteLine("3.Monthy");
+            Console.WriteLine("3.Monthly");
             Console.WriteLine("4.Yearly");
             Console.WriteLine("Enter the option:");
             int choice = GetUserChoice();
@@ -151,7 +151,7 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("In Delete Section\n");
             Console.WriteLine("Enter Date");
             DateTime date = GetValidToDoDate();
-            foreach (ToDo toDo in _toDoService.ToDoOfUser[userName])
+            foreach (ToDo toDo in _toDoService.GetToDoOfAUser(userName))
             {
                 if (toDo.TargetDate == date)
                 {
@@ -180,7 +180,7 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("In Edit Section\n");
             Console.WriteLine("Enter Date");
             DateTime date = GetValidToDoDate();
-            foreach (ToDo toDo in _toDoService.ToDoOfUser[userName])
+            foreach (ToDo toDo in _toDoService.GetToDoOfAUser(userName))
             {
                 if (toDo.TargetDate == date)
                 {
@@ -227,7 +227,7 @@ namespace ToDoApp.UserInteraction
                     toDo.ToDoDescription = newDescription;
                     break;
                 case 3:
-                    Console.WriteLine("Enter New Date");
+                    Console.WriteLine("Enter New Date (dd/MM/yyyy)");
                     DateTime newDate = GetValidToDoDate();
                     toDo.TargetDate = newDate;
                     break;
@@ -256,23 +256,21 @@ namespace ToDoApp.UserInteraction
 
         public void PrintDashBoard(string userName)
         {
-            var toDo = _toDoService.ToDoOfUser[userName];
+            var toDo = _toDoService.GetToDoOfAUser(userName);
             var dashboardList = toDo.OrderBy(x => x.TargetDate).Take(2);
+            Console.WriteLine("\n================");
+            Console.WriteLine("    DASHBOARD   ");
 
             if (dashboardList.Any())
             {
-                Console.WriteLine("\n================");
-                Console.WriteLine("    DASHBOARD   ");
                 Console.WriteLine("  UpComing Tasks");
                 foreach (var item in dashboardList)
                 {
-                    Console.WriteLine($"Tile: {item.ToDoHeading} | Description: {item.ToDoDescription} | Date: {item.TargetDate.ToString("dd/MM/yyyy")} | Recurrence: {item.ToDoRecurrence}");
+                    Console.WriteLine($"Tile: {item.ToDoHeading} | Description: {item.ToDoDescription} | Date: {item.TargetDate:dd/MM/yyyy} | Recurrence: {item.ToDoRecurrence}");
                 }
             }
             else
             {
-                Console.WriteLine("\n================");
-                Console.WriteLine("    DASHBOARD   ");
                 Console.WriteLine("No upcoming tasks.");
             }
         }
@@ -284,8 +282,8 @@ namespace ToDoApp.UserInteraction
             Console.WriteLine("3. Monthly");
             Console.WriteLine("4. Yearly");
             Console.WriteLine("Enter the duration:");
-            string duration = Console.ReadLine();
-            var toDoList = _toDoService.ToDoOfUser[userName];
+            string? duration = Console.ReadLine();
+            var toDoList = _toDoService.GetToDoOfAUser(userName);
             IEnumerable<ToDo> filteredToDos = Enumerable.Empty<ToDo>();
 
             switch (duration)

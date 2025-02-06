@@ -6,7 +6,7 @@ namespace ToDoApp.Service
     public class LoginService
     {
         private UserRepository _userRepository;
-        public List<User> UserList { get; set; }
+        private List<User> UserList { get; set; }
         public LoginService(UserRepository userRepository)
         {
             _userRepository = userRepository;
@@ -23,7 +23,7 @@ namespace ToDoApp.Service
             return UserList;
         }
 
-        public bool PassWordValidator(string PassWord)
+        public bool CheckPasswordLengthIsGreaterThan6(string PassWord)
         {
             if (PassWord.Length >= 6)
             {
@@ -35,7 +35,7 @@ namespace ToDoApp.Service
             }
         }
 
-        public bool checkUserIdPresent(int id)
+        public bool CheckUserIdPresent(int id)
         {
             IEnumerable<User> usersInList =GetListOfUsers();
             foreach (var user in usersInList)
@@ -61,7 +61,7 @@ namespace ToDoApp.Service
             return false;
         }
 
-        public string? GetUserPassWord(int userId)
+        public string? GetUserName(int userId)
         {
             string? userName=null;
             foreach(var user in UserList)

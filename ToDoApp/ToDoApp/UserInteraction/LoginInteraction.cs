@@ -29,12 +29,12 @@ namespace ToDoApp.UserInteraction
         {
             int userId;
             bool IsUserId = int.TryParse(Console.ReadLine(), out userId);
-            IsUserId = _loginService.checkUserIdPresent(userId);
+            IsUserId = _loginService.CheckUserIdPresent(userId);
             while (userId==0 || IsUserId)
             {
                 Console.WriteLine("Enter Valid Id");
                 IsUserId = int.TryParse(Console.ReadLine(), out userId);
-                IsUserId = _loginService.checkUserIdPresent(userId);
+                IsUserId = _loginService.CheckUserIdPresent(userId);
             }
             return userId;
         }
@@ -42,12 +42,12 @@ namespace ToDoApp.UserInteraction
         public string GetUserPassWord()
         {
             string? passWord = Console.ReadLine();
-            bool isPass = _loginService.PassWordValidator(passWord);
+            bool isPass = _loginService.CheckPasswordLengthIsGreaterThan6(passWord);
             while (!isPass)
             {
                 Console.WriteLine("Enter Valid PassWord");
                 passWord = Console.ReadLine();
-                isPass = _loginService.PassWordValidator(passWord);
+                isPass = _loginService.CheckPasswordLengthIsGreaterThan6(passWord);
             }
             return passWord;
         }
@@ -70,16 +70,16 @@ namespace ToDoApp.UserInteraction
         {
             int userId;
             bool IsUserId = int.TryParse(Console.ReadLine(), out userId);
-            IsUserId = _loginService.checkUserIdPresent(userId);
+            IsUserId = _loginService.CheckUserIdPresent(userId);
             while (!IsUserId)
             {
                 Console.WriteLine("User ID not present! Enter again");
                 IsUserId = int.TryParse(Console.ReadLine(), out userId);
-                IsUserId = _loginService.checkUserIdPresent(userId);
+                IsUserId = _loginService.CheckUserIdPresent(userId);
             }
             return userId;
         }
-        public string GetExistingUserPassWord()
+        public void GetExistingUserPassWord()
         {
             string? passWord = Console.ReadLine();
             bool isPass = _loginService.checkPassWordPresent(passWord);
@@ -87,18 +87,17 @@ namespace ToDoApp.UserInteraction
             {
                 Console.WriteLine("Enter Valid PassWord");
                 passWord = Console.ReadLine();
-                isPass = _loginService.PassWordValidator(passWord);
+                isPass = _loginService.CheckPasswordLengthIsGreaterThan6(passWord);
             }
-            return passWord;
         }
         public string? ExistingUser()
         {
             Console.WriteLine("Enter UserId");
             int userId=GetExistingUserId();
             Console.WriteLine("Enter The Password");
-            string passWord =GetExistingUserPassWord();
+            GetExistingUserPassWord();
             Console.WriteLine("\n****Login successful****\n");
-            string? userName=_loginService.GetUserPassWord(userId);
+            string? userName=_loginService.GetUserName(userId);
             return userName;
         }
 

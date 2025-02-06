@@ -6,7 +6,7 @@ namespace ToDoApp.Service
     public class ToDoService
     {
         private ToDoRepository _toDORepository;
-        public Dictionary<string,List<ToDo>> ToDoOfUser { get; set; }
+        private Dictionary<string,List<ToDo>> ToDoOfUser { get; set; }
 
         public ToDoService(ToDoRepository toDORepository)
         {
@@ -15,6 +15,10 @@ namespace ToDoApp.Service
             ToDoOfUser=_toDORepository.ReadAlldata();
         }
 
+        public List<ToDo> GetToDoOfAUser(string userName)
+        {
+            return ToDoOfUser[userName];
+        }
         public void InitializeUser(string userName)
         {
             if (!ToDoOfUser.ContainsKey(userName))
@@ -38,7 +42,7 @@ namespace ToDoApp.Service
         {
             if (ToDoOfUser[userName].Count==0)
             {
-                return null;
+                return new List<ToDo>();
             }
             return ToDoOfUser[userName];
         }
